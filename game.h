@@ -28,4 +28,6 @@ public:
     void update(sf::RenderWindow& window);
 
     void run();
+
+    ~Game();
 };

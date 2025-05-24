@@ -74,7 +74,7 @@ void Ball::setTouchesBrick(BaseBlock& block) {
     block.hit();
 
     if (block.isGiveSpeed())
-        speed += 0.25f;
+        speed += 0.05f;
 
     if ((blockPosition.getX() - half_width) <= position->getX() && (blockPosition.getX() + half_width) >= position->getX()) {
         position->setY(position->getY() + (position->getY() > blockPosition.getY() ? 1 : -1) * (2 * radius + half_height - y_distance));

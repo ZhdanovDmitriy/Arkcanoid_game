@@ -1,9 +1,9 @@
 #include "game.h"
-
+#include <cstdlib>
 
 Game::Game() {
-    ball = new Ball(width, height, 0.35f);
-    slider = new Slider(width, height, 0.3f);
+    ball = new Ball(width, height, 0.2f);
+    slider = new Slider(width, height, 0.5f);
 
     const int blockSize = BaseBlock::getSize() / 2;
 
@@ -12,7 +12,9 @@ Game::Game() {
 
         for (int colIndex = 0; colIndex < width / blockSize; colIndex++) {
             BaseBlock* block;
-            int probability = rand() % 10, pos_x = blockSize + colIndex * 2 * blockSize, pos_y = blockSize + rowIndex * 2 * blockSize;
+            int probability = rand() % 10;
+            int pos_x = blockSize + colIndex * 2 * blockSize;
+            int pos_y = blockSize + rowIndex * 2 * blockSize;
 
             switch (probability) {
             case 0:
@@ -24,8 +26,9 @@ Game::Game() {
             case 2:
                 block = new SpeedBlock(pos_x, pos_y);
                 break;
-            None:
+            default:
                 block = new BaseBlock(pos_x, pos_y);
+                break;
             }
 
             row.push_back(block);
@@ -41,6 +44,7 @@ Game::Game() {
 
     scoreText.setPosition(width / 2, height / 2);
 }
+
 
 void Game::checkBlocks() {
     for (int rowIndex = 0; rowIndex < blocks.size(); rowIndex++) {
@@ -119,6 +123,16 @@ void Game::update(sf::RenderWindow& window) {
         slider->update();
         render(window);
         window.display();
+    }
+}
+
+Game::~Game() {
+    delete ball;
+    delete slider;
+    for (auto& row : blocks) {
+        for (auto& block : row) {
+            delete block;
+        }
     }
 }
 

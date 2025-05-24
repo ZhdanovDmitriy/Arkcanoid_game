@@ -24,6 +24,10 @@ void Vector2::norm() {
 
 Position::Position(float _x, float _y) { position = new Vector2(_x, _y); }
 
+Position::~Position() {
+    delete position;
+}
+
 void Position::setPosition(Vector2& vector) {
     setPosition(vector.getX(), vector.getY());
 }
@@ -43,6 +47,10 @@ Move::Move(Vector2 _position, float _speed) : speed(_speed), Position(_position.
 
 Move::Move(Vector2 _position, Vector2 _way, float _speed) : Move(_position, _speed) {
     setWay(_way);
+}
+
+Move::~Move() {
+    delete way;
 }
 
 Vector2 Move::getWay() {

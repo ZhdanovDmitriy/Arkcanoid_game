@@ -26,7 +26,6 @@ public:
 class Position {
 protected:
     Vector2* position;
-
 public:
     Position(float x, float y);
 
@@ -35,6 +34,8 @@ public:
     void setPosition(float x, float y);
 
     Vector2 getPosition();
+
+    virtual ~Position();
 };
 
 
@@ -53,6 +54,8 @@ public:
     void setWay(Vector2 way);
 
     void move();
+
+    virtual ~Move();
 };
 
 
