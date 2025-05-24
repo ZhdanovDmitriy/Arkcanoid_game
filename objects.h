@@ -135,3 +135,8 @@ class SpeedBlock : public BaseBlock {
 public:
     SpeedBlock(float x, float y);
 };
+
+class BonusBlock : public BaseBlock {
+public:
+    BonusBlock(float x, float y);
+};

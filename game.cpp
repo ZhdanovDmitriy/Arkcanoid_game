@@ -26,6 +26,9 @@ Game::Game() {
             case 2:
                 block = new SpeedBlock(pos_x, pos_y);
                 break;
+            case 3:
+                block = new BonusBlock(pos_x, pos_y);
+                break;
             default:
                 block = new BaseBlock(pos_x, pos_y);
                 break;
@@ -44,7 +47,6 @@ Game::Game() {
 
     scoreText.setPosition(width / 2, height / 2);
 }
-
 
 void Game::checkBlocks() {
     for (int rowIndex = 0; rowIndex < blocks.size(); rowIndex++) {

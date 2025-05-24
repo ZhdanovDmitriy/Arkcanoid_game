@@ -169,3 +169,7 @@ SpeedBlock::SpeedBlock(float _x, float _y) : BaseBlock(_x, _y) {
     giveSpeed = true;
     draw.setFillColor(sf::Color(123, 32, 200));
 }
+
+BonusBlock::BonusBlock(float _x, float _y) : BaseBlock(_x, _y) {
+    draw.setFillColor(sf::Color(32, 32, 200));
+}
