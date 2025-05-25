@@ -5,18 +5,20 @@
 
 class Game {
 private:
-    const int width = 1080, height = 720;
     int score = 0;
+    const int width = 1080, height = 720;
 
     sf::Keyboard::Scancode pressed = sf::Keyboard::Scancode::Unknown;
-    sf::Text scoreText;
-
 
     Ball* ball;
     Slider* slider;
     std::vector<std::vector<BaseBlock*>> blocks;
 
+    bool floorTouchedFlag = false;
 public:
+    sf::Font font;
+    sf::Text scoreText;
+
     Game();
 
     void checkBlocks();

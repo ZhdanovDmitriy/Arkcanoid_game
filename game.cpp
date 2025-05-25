@@ -40,12 +40,20 @@ Game::Game() {
         blocks.push_back(row);
     }
 
-    scoreText.setString("Score: " + std::to_string(score));
+    if (!font.loadFromFile("arial.ttf")) {
+        std::cerr << "Failed to load font arial.ttf\n";
+    }
+    scoreText.setFont(font);
     scoreText.setCharacterSize(24);
-    scoreText.setFillColor(sf::Color(32, 32, 32));
+    scoreText.setFillColor(sf::Color::White);
     scoreText.setStyle(sf::Text::Bold);
-
-    scoreText.setPosition(width / 2, height / 2);
+    scoreText.setString("Score: 0");
+    {
+        auto bounds = scoreText.getLocalBounds();
+        float x = width - bounds.width - 40.f;
+        float y = height - bounds.height - 10.f;
+        scoreText.setPosition(x, y);
+    }
 }
 
 void Game::checkBlocks() {
@@ -60,7 +68,7 @@ void Game::checkBlocks() {
 
             if (block->getHealth() == 0) {
                 blocks[rowIndex][colIndex] = nullptr;
-                score += 5;
+                score += 1;
                 scoreText.setString("Score: " + std::to_string(score));
             }
         }
@@ -112,15 +120,30 @@ void Game::render(sf::RenderWindow& window) {
 
 void Game::update(sf::RenderWindow& window) {
     sf::Event event;
-    sf::Clock clock;
-
     while (window.isOpen()) {
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event))
             checkEvents(window, event);
-        }
 
         window.clear();
         ball->update(*slider);
+        {
+            auto circle = ball->getDraw();
+            float ballBottom = circle.getPosition().y + circle.getRadius() * 2.f;
+            if (!floorTouchedFlag && ballBottom >= height) {
+                score -= 1;
+                scoreText.setString("Score: " + std::to_string(score));
+                auto bounds = scoreText.getLocalBounds();
+                scoreText.setPosition(
+                    width - bounds.width - 40.f,
+                    height - bounds.height - 10.f
+                );
+                floorTouchedFlag = true;
+            }
+            if (ballBottom < height) {
+                floorTouchedFlag = false;
+            }
+        }
+
         checkBlocks();
         slider->update();
         render(window);
