@@ -22,6 +22,10 @@ private:
     };
     std::vector<BonusItem> bonuses;
 
+    bool noFloorPenaltyActive = false;
+    bool stickinessActive = false;
+    float stickinessFactor = 0.5f;
+
 public:
     sf::Font font;
     sf::Text scoreText;

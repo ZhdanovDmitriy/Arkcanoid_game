@@ -65,29 +65,30 @@ void Game::checkBlocks() {
                 if (auto bb = dynamic_cast<BonusBlock*>(cell)) {
                     float bx = bb->getPosition().getX();
                     float by = bb->getPosition().getY();
-                    BonusType t = static_cast<BonusType>(rand() % 3);
+                    BonusType t = static_cast<BonusType>(rand() % 5);
                     Bonus* nb = new Bonus(bx, by, 0.3f, t);
 
                     sf::CircleShape s(BaseBlock::getSize() / 4.f);
                     switch (static_cast<int>(t)) {
-                    case 0: s.setFillColor(sf::Color::Yellow); break;
-                    case 1: s.setFillColor(sf::Color(255, 165, 0)); break;
-                    case 2: s.setFillColor(sf::Color::Red); break;
+                    case 0: s.setFillColor(sf::Color::Yellow);break;
+                    case 1: s.setFillColor(sf::Color(255, 165, 0));break;
+                    case 2: s.setFillColor(sf::Color::Red);break;
+                    case 3: s.setFillColor(sf::Color::Cyan);break;
+                    case 4: s.setFillColor(sf::Color(0, 128, 128));break;
                     }
                     s.setPosition(bx, by);
                     bonuses.push_back({ nb, s });
                 }
-                delete cell; cell = nullptr;
+                delete cell;
+                cell = nullptr;
                 score += 1;
                 scoreText.setString("Score: " + std::to_string(score));
                 auto bnds = scoreText.getLocalBounds();
-                scoreText.setPosition(width - bnds.width - 10.f,
-                    height - bnds.height - 10.f);
+                scoreText.setPosition(width - bnds.width - 10.f, height - bnds.height - 10.f);
             }
         }
     }
 }
-
 
 void Game::checkEvents(sf::RenderWindow& window, sf::Event& event) {
     if (event.type == sf::Event::Closed)
@@ -135,6 +136,15 @@ void Game::update(sf::RenderWindow& w) {
         w.clear();
         ball->update(*slider);
         auto circ = ball->getDraw();
+        if (stickinessActive && circ.getGlobalBounds().intersects(slider->getDraw().getGlobalBounds()))
+        {
+            Vector2 w = ball->getWay();
+            float sv = slider->getWay().getX() * stickinessFactor;
+            w.setX(w.getX() + sv);
+            w.norm();
+            ball->setWay(w);
+            stickinessActive = false;
+        }
         float bottom = circ.getPosition().y + circ.getRadius() * 2;
         if (!floorTouchedFlag && bottom >= height) {
             score--; floorTouchedFlag = true;
@@ -143,6 +153,8 @@ void Game::update(sf::RenderWindow& w) {
             scoreText.setPosition(width - b.width - 10.f,
                 height - b.height - 10.f);
         }
+        floorTouchedFlag = true;
+        noFloorPenaltyActive = false;
         if (bottom < height) floorTouchedFlag = false;
         checkBlocks();
         slider->update();
@@ -166,6 +178,12 @@ void Game::update(sf::RenderWindow& w) {
                     break;
                 case BonusType::PaddleExpand:
                     slider->expandWidth(1.2f);
+                    break;
+                case BonusType::IncreasedStickiness:
+                    stickinessActive = true;
+                    break;
+                case BonusType::NoFloorPenalty:
+                    noFloorPenaltyActive = true;
                     break;
                 }
                 delete it->bonus;

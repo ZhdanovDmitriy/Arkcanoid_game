@@ -74,7 +74,9 @@ public:
 enum class BonusType {
     Trajectory,
     SpeedReset,
-    PaddleExpand
+    PaddleExpand,
+    IncreasedStickiness,
+    NoFloorPenalty
 };
 
 class Bonus : public Move {
