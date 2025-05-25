@@ -3,7 +3,6 @@
 
 #include "structures.h"
 
-
 class AbstractObjectMovableDraw {
 public:
     virtual void updateDrawPosition() = 0;
@@ -44,6 +43,8 @@ public:
 
     virtual void update();
     void update(Slider& slider);
+
+    void setSpeed(float newSpeed);
 };
 
 
@@ -53,7 +54,6 @@ private:
     int selfWidth = 200;
 
     sf::RectangleShape draw;
-
 public:
     Slider(int gameWidth, int gameHeight, float speed);
 
@@ -67,28 +67,23 @@ public:
     virtual void updateDrawPosition();
 
     virtual void update();
-};
 
+    void expandWidth(float factor);
+};
 
 enum class BonusType {
-    None = -1,
-    add_ball = 0,
-    slicy,
-    slider_width,
-    add_ball_speed,
-    change_trajectory,
+    Trajectory,
+    SpeedReset,
+    PaddleExpand
 };
 
-
 class Bonus : public Move {
-protected:
-    BonusType type = BonusType::None;
-
 public:
-    Bonus(float x, float y, float speed);
-
-    Bonus(float x, float y, float speed, BonusType type);
-
+    Bonus(float _x, float _y, float _speed, BonusType _type = BonusType::Trajectory);
+    void move() { Move::move(); }
+    BonusType getType() const { return type; }
+private:
+    BonusType type;
 };
 
 

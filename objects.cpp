@@ -74,7 +74,7 @@ void Ball::setTouchesBrick(BaseBlock& block) {
     block.hit();
 
     if (block.isGiveSpeed())
-        speed += 0.05f;
+        speed += 0.1f;
 
     if ((blockPosition.getX() - half_width) <= position->getX() && (blockPosition.getX() + half_width) >= position->getX()) {
         position->setY(position->getY() + (position->getY() > blockPosition.getY() ? 1 : -1) * (2 * radius + half_height - y_distance));
@@ -102,11 +102,13 @@ void Ball::update(Slider& slider) {
     setTouchesSlider(slider);
 }
 
-Slider::Slider(int gameWidth, int gameHeight, float speed) :
-    Move(Vector2(gameWidth / 2, 5 * gameHeight / 6), Vector2(0, 0), speed),
-    GameBorderData(gameWidth, gameHeight) {
+void Ball::setSpeed(float newSpeed) {
+    speed = newSpeed;
+}
+
+Slider::Slider(int gameWidth, int gameHeight, float speed) : Move(Vector2(gameWidth / 2, 5 * gameHeight / 6), Vector2(0, 0), speed), GameBorderData(gameWidth, gameHeight){
     draw = sf::RectangleShape(sf::Vector2f(selfWidth, selfHeight));
-    draw.setFillColor(sf::Color(255, 255, 255));
+    draw.setFillColor(sf::Color::White);
     updateDrawPosition();
 }
 
@@ -133,7 +135,12 @@ void Slider::update() {
     updateDrawPosition();
 }
 
-Bonus::Bonus(float _x, float _y, float _speed) : Move(Vector2(_x, _y), Vector2(0, 1), _speed) { }
+void Slider::expandWidth(float factor) {
+    selfWidth = static_cast<int>(selfWidth * factor);
+    draw.setSize({ float(selfWidth), float(selfHeight) });
+    updateDrawPosition();
+}
+
 
 Bonus::Bonus(float _x, float _y, float _speed, BonusType _type) : type(_type), Move(Vector2(_x, _y), Vector2(0, 1), _speed) { }
 
