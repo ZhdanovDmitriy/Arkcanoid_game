@@ -15,6 +15,13 @@ private:
     std::vector<std::vector<BaseBlock*>> blocks;
 
     bool floorTouchedFlag = false;
+
+    struct BonusItem {
+        Bonus* bonus;
+        sf::CircleShape shape;
+    };
+    std::vector<BonusItem> bonuses;
+
 public:
     sf::Font font;
     sf::Text scoreText;

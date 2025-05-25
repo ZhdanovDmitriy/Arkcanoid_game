@@ -57,19 +57,28 @@ Game::Game() {
 }
 
 void Game::checkBlocks() {
-    for (int rowIndex = 0; rowIndex < blocks.size(); rowIndex++) {
-        for (int colIndex = 0; colIndex < blocks[rowIndex].size(); colIndex++) {
-            auto block = blocks[rowIndex][colIndex];
+    for (auto& row : blocks) {
+        for (auto& cell : row) {
+            if (!cell) continue;
+            ball->setTouchesBrick(*cell);
 
-            if (block == nullptr)
-                continue;
-
-            ball->setTouchesBrick(*block);
-
-            if (block->getHealth() == 0) {
-                blocks[rowIndex][colIndex] = nullptr;
+            if (cell->getHealth() == 0) {
+                if (auto bb = dynamic_cast<BonusBlock*>(cell)) {
+                    float bx = bb->getPosition().getX();
+                    float by = bb->getPosition().getY();
+                    Bonus* newB = new Bonus(bx, by, 0.3f);
+                    sf::CircleShape s(BaseBlock::getSize() / 4.f);
+                    s.setFillColor(sf::Color::Yellow);
+                    s.setPosition(bx, by);
+                    bonuses.push_back({ newB, s });
+                }
+                delete cell;
+                cell = nullptr;
                 score += 1;
                 scoreText.setString("Score: " + std::to_string(score));
+                auto b = scoreText.getLocalBounds();
+                scoreText.setPosition(width - b.width - 10.f,
+                    height - b.height - 10.f);
             }
         }
     }
@@ -106,46 +115,62 @@ void Game::render(sf::RenderWindow& window) {
     window.draw(ball->getDraw());
     window.draw(slider->getDraw());
 
-    for (int rowIndex = 0; rowIndex < blocks.size(); rowIndex++) {
-        for (int colIndex = 0; colIndex < blocks[rowIndex].size(); colIndex++) {
-            auto block = blocks[rowIndex][colIndex];
+    for (auto& row : blocks)
+        for (auto& b : row)
+            if (b) window.draw(b->getDraw());
 
-            if (block == nullptr)
-                continue;
-
-            window.draw(block->getDraw());
-        }
-    }
+    for (auto& bi : bonuses)
+        window.draw(bi.shape);
 }
 
 void Game::update(sf::RenderWindow& window) {
     sf::Event event;
+
     while (window.isOpen()) {
         while (window.pollEvent(event))
             checkEvents(window, event);
 
         window.clear();
         ball->update(*slider);
+
         {
-            auto circle = ball->getDraw();
-            float ballBottom = circle.getPosition().y + circle.getRadius() * 2.f;
-            if (!floorTouchedFlag && ballBottom >= height) {
-                score -= 1;
+            auto csh = ball->getDraw();
+            float bottom = csh.getPosition().y + csh.getRadius() * 2;
+            if (!floorTouchedFlag && bottom >= height) {
+                score--;
                 scoreText.setString("Score: " + std::to_string(score));
-                auto bounds = scoreText.getLocalBounds();
-                scoreText.setPosition(
-                    width - bounds.width - 40.f,
-                    height - bounds.height - 10.f
-                );
+                auto b = scoreText.getLocalBounds();
+                scoreText.setPosition(width - b.width - 10.f,
+                    height - b.height - 10.f);
                 floorTouchedFlag = true;
             }
-            if (ballBottom < height) {
-                floorTouchedFlag = false;
-            }
+            if (bottom < height) floorTouchedFlag = false;
         }
 
         checkBlocks();
         slider->update();
+
+        for (auto it = bonuses.begin(); it != bonuses.end(); ) {
+            it->bonus->move();
+            Vector2 pos = static_cast<Position&>(*it->bonus).getPosition();
+            it->shape.setPosition(pos.getX(), pos.getY());
+            if (it->shape.getGlobalBounds().intersects(slider->getDraw().getGlobalBounds())) {
+                Vector2 w = ball->getWay();
+                float angle = (std::rand() % 91 - 45) * 3.14159f / 180.f;
+                float nx = w.getX() * std::cos(angle) - w.getY() * std::sin(angle);
+                float ny = w.getX() * std::sin(angle) + w.getY() * std::cos(angle);
+                Vector2 newWay(nx, ny); newWay.norm();
+                ball->setWay(newWay);
+
+                delete it->bonus;
+                it = bonuses.erase(it);
+            }
+            else if (pos.getY() > height) {
+                delete it->bonus;
+                it = bonuses.erase(it);
+            }
+            else ++it;
+        }
         render(window);
         window.display();
     }
@@ -159,6 +184,8 @@ Game::~Game() {
             delete block;
         }
     }
+    for (auto& bi : bonuses)
+        delete bi.bonus;
 }
 
 void Game::run() {
