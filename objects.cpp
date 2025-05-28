@@ -74,7 +74,7 @@ void Ball::setTouchesBrick(BaseBlock& block) {
     block.hit();
 
     if (block.isGiveSpeed())
-        speed += 0.1f;
+        speed += 0.4f;
 
     if ((blockPosition.getX() - half_width) <= position->getX() && (blockPosition.getX() + half_width) >= position->getX()) {
         position->setY(position->getY() + (position->getY() > blockPosition.getY() ? 1 : -1) * (2 * radius + half_height - y_distance));
@@ -142,7 +142,17 @@ void Slider::expandWidth(float factor) {
 }
 
 
-Bonus::Bonus(float _x, float _y, float _speed, BonusType _type) : type(_type), Move(Vector2(_x, _y), Vector2(0, 1), _speed) { }
+Bonus::Bonus(float _x, float _y, float _speed): Move(Vector2(_x, _y), Vector2(0, 1), _speed){}
+
+TrajectoryBonus::TrajectoryBonus(float x, float y, float s): Bonus(x, y, s) {}
+
+SpeedResetBonus::SpeedResetBonus(float x, float y, float s): Bonus(x, y, s) {}
+
+PaddleExpandBonus::PaddleExpandBonus(float x, float y, float s): Bonus(x, y, s) {}
+
+IncreasedStickinessBonus::IncreasedStickinessBonus(float x, float y, float s): Bonus(x, y, s) {}
+
+NoFloorPenaltyBonus::NoFloorPenaltyBonus(float x, float y, float s): Bonus(x, y, s) {}
 
 BaseBlock::BaseBlock(float _x, float _y) : Position(_x, _y) {
     health = 1;

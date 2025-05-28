@@ -71,23 +71,36 @@ public:
     void expandWidth(float factor);
 };
 
-enum class BonusType {
-    Trajectory,
-    SpeedReset,
-    PaddleExpand,
-    IncreasedStickiness,
-    NoFloorPenalty
-};
-
 class Bonus : public Move {
 public:
-    Bonus(float _x, float _y, float _speed, BonusType _type = BonusType::Trajectory);
+    Bonus(float x, float y, float speed);
     void move() { Move::move(); }
-    BonusType getType() const { return type; }
-private:
-    BonusType type;
 };
 
+class TrajectoryBonus : public Bonus {
+public:
+    TrajectoryBonus(float x, float y, float speed);
+};
+
+class PaddleExpandBonus : public Bonus {
+public:
+    PaddleExpandBonus(float x, float y, float speed);
+};
+
+class  SpeedResetBonus : public Bonus {
+public:
+    SpeedResetBonus(float x, float y, float speed);
+};
+
+class IncreasedStickinessBonus : public Bonus {
+public:
+    IncreasedStickinessBonus(float x, float y, float speed);
+};
+
+class NoFloorPenaltyBonus : public Bonus {
+public:
+    NoFloorPenaltyBonus(float x, float y, float speed);
+};
 
 class BaseBlock : public Position {
 protected:

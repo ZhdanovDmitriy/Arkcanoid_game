@@ -2,8 +2,8 @@
 #include <cstdlib>
 
 Game::Game() {
-    ball = new Ball(width, height, 0.2f);
-    slider = new Slider(width, height, 0.5f);
+    ball = new Ball(width, height, 0.4f);
+    slider = new Slider(width, height, 0.7f);
 
     const int blockSize = BaseBlock::getSize() / 2;
 
@@ -48,12 +48,10 @@ Game::Game() {
     scoreText.setFillColor(sf::Color::White);
     scoreText.setStyle(sf::Text::Bold);
     scoreText.setString("Score: 0");
-    {
-        auto bounds = scoreText.getLocalBounds();
-        float x = width - bounds.width - 10.f;
-        float y = height - bounds.height - 10.f;
-        scoreText.setPosition(x, y);
-    }
+    auto bounds = scoreText.getLocalBounds();
+    float x = width - bounds.width - 10.f;
+    float y = height - bounds.height - 10.f;
+    scoreText.setPosition(x, y);
 }
 
 void Game::checkBlocks() {
@@ -65,17 +63,33 @@ void Game::checkBlocks() {
                 if (auto bb = dynamic_cast<BonusBlock*>(cell)) {
                     float bx = bb->getPosition().getX();
                     float by = bb->getPosition().getY();
-                    BonusType t = static_cast<BonusType>(rand() % 5);
-                    Bonus* nb = new Bonus(bx, by, 0.3f, t);
-
+                    Bonus* nb = nullptr;
                     sf::CircleShape s(BaseBlock::getSize() / 4.f);
-                    switch (static_cast<int>(t)) {
-                    case 0: s.setFillColor(sf::Color::Yellow);break;
-                    case 1: s.setFillColor(sf::Color(255, 165, 0));break;
-                    case 2: s.setFillColor(sf::Color::Red);break;
-                    case 3: s.setFillColor(sf::Color::Cyan);break;
-                    case 4: s.setFillColor(sf::Color(0, 128, 128));break;
+
+                    int r = rand() % 5;
+                    switch (r) {
+                    case 0:
+                        nb = new TrajectoryBonus(bx, by, 0.4f);
+                        s.setFillColor(sf::Color::Yellow);
+                        break;
+                    case 1:
+                        nb = new SpeedResetBonus(bx, by, 0.4f);
+                        s.setFillColor(sf::Color(255, 165, 0));
+                        break;
+                    case 2:
+                        nb = new PaddleExpandBonus(bx, by, 0.4f);
+                        s.setFillColor(sf::Color::Red);
+                        break;
+                    case 3:
+                        nb = new IncreasedStickinessBonus(bx, by, 0.4f);
+                        s.setFillColor(sf::Color::Cyan);
+                        break;
+                    case 4:
+                        nb = new NoFloorPenaltyBonus(bx, by, 0.4f);
+                        s.setFillColor(sf::Color(0, 128, 128));
+                        break;
                     }
+
                     s.setPosition(bx, by);
                     bonuses.push_back({ nb, s });
                 }
@@ -162,30 +176,30 @@ void Game::update(sf::RenderWindow& w) {
             it->bonus->move();
             auto pos = static_cast<Position&>(*it->bonus).getPosition();
             it->shape.setPosition(pos.getX(), pos.getY());
+
             if (it->shape.getGlobalBounds().intersects(slider->getDraw().getGlobalBounds())) {
-                switch (it->bonus->getType()) {
-                case BonusType::Trajectory: {
+                // применяем эффект через dynamic_cast
+                if (auto b = dynamic_cast<TrajectoryBonus*>(it->bonus)) {
                     auto wv = ball->getWay();
                     float ang = (rand() % 91 - 45) * 3.14159f / 180.f;
                     float nx = wv.getX() * cos(ang) - wv.getY() * sin(ang);
                     float ny = wv.getX() * sin(ang) + wv.getY() * cos(ang);
                     Vector2 nw(nx, ny); nw.norm();
                     ball->setWay(nw);
-                    break;
                 }
-                case BonusType::SpeedReset:
-                    ball->setSpeed(0.2f);
-                    break;
-                case BonusType::PaddleExpand:
+                else if (auto b = dynamic_cast<SpeedResetBonus*>(it->bonus)) {
+                    ball->setSpeed(0.4f);
+                }
+                else if (auto b = dynamic_cast<PaddleExpandBonus*>(it->bonus)) {
                     slider->expandWidth(1.2f);
-                    break;
-                case BonusType::IncreasedStickiness:
-                    stickinessActive = true;
-                    break;
-                case BonusType::NoFloorPenalty:
-                    noFloorPenaltyActive = true;
-                    break;
                 }
+                else if (auto b = dynamic_cast<IncreasedStickinessBonus*>(it->bonus)) {
+                    stickinessActive = true;
+                }
+                else if (auto b = dynamic_cast<NoFloorPenaltyBonus*>(it->bonus)) {
+                    noFloorPenaltyActive = true;
+                }
+
                 delete it->bonus;
                 it = bonuses.erase(it);
             }
@@ -195,6 +209,7 @@ void Game::update(sf::RenderWindow& w) {
             }
             else ++it;
         }
+
 
         render(w);
         w.display();
