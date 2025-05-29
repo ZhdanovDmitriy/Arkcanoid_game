@@ -60,33 +60,34 @@ void Ball::setTouchesSlider(Slider& slider) {
 }
 
 void Ball::setTouchesBrick(BaseBlock& block) {
-    Vector2 blockPosition = block.getPosition();
+    Vector2 blockPos = block.getPosition();
 
-    float x_distance = abs(blockPosition.getX() - position->getX()), half_width = static_cast<float>(block.getSize()) / 2;
-    float y_distance = abs(blockPosition.getY() - position->getY()), half_height = static_cast<float>(block.getSize()) / 2;
+    float xDist = abs(blockPos.getX() - position->getX());
+    float yDist = abs(blockPos.getY() - position->getY());
+    float halfW = static_cast<float>(block.getSize()) / 2;
+    float halfH = static_cast<float>(block.getSize()) / 2;
 
-    bool horizontalCond = x_distance <= (radius + half_width);
-    bool verticalCond = y_distance <= (radius + half_height);
-
-    if (!(verticalCond && horizontalCond))
+    bool collideX = xDist <= (radius + halfW);
+    bool collideY = yDist <= (radius + halfH);
+    if (!(collideX && collideY))
         return;
 
     block.hit();
-
     if (block.isGiveSpeed())
         speed += 0.4f;
 
-    if ((blockPosition.getX() - half_width) <= position->getX() && (blockPosition.getX() + half_width) >= position->getX()) {
-        position->setY(position->getY() + (position->getY() > blockPosition.getY() ? 1 : -1) * (2 * radius + half_height - y_distance));
-        way->setY(-way->getY());
-    }
-    else if ((blockPosition.getY() - half_height) <= position->getY() && (blockPosition.getY() + half_height) >= position->getY()) {
-        position->setX(position->getX() + (position->getX() > blockPosition.getX() ? 1 : -1) * (2 * radius + half_width - x_distance));
+    float overlapX = (radius + halfW) - xDist;
+    float overlapY = (radius + halfH) - yDist;
+
+    if (overlapX < overlapY) {
+        float sign = (position->getX() > blockPos.getX()) ? 1.f : -1.f;
+        position->setX(position->getX() + sign * overlapX);
         way->setX(-way->getX());
     }
     else {
+        float sign = (position->getY() > blockPos.getY()) ? 1.f : -1.f;
+        position->setY(position->getY() + sign * overlapY);
         way->setY(-way->getY());
-        way->setX(-way->getX());
     }
 }
 
